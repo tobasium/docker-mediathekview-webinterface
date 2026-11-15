@@ -10,9 +10,9 @@ RUN \
     sed-patch 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
     locale-gen
 
-ENV LC_ALL en_US.UTF-8
-ENV LANGUAGE en_US.UTF-8
-ENV LANG en_US.UTF-8
+ENV LC_ALL=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+ENV LANG=en_US.UTF-8
 
 # Runtime dependencies.
 RUN \
@@ -44,14 +44,19 @@ LABEL \
       org.label-schema.description="Docker container for Mediathekview" \
       org.label-schema.version=$MEDIATHEK_VERSION \
       org.label-schema.vcs-url="https://github.com/tobasium/docker-mediathekview-webinterface" \
-      org.label-schema.schema-version="1.0"
+      org.label-schema.schema-version="1.0" \
+      org.opencontainers.image.title="MediathekView Webinterface" \
+      org.opencontainers.image.description="Browser-accessible MediathekView container" \
+      org.opencontainers.image.version=$MEDIATHEK_VERSION \
+      org.opencontainers.image.source="https://github.com/tobasium/docker-mediathekview-webinterface"
 
 # Define software download URLs.
 ARG MEDIATHEKVIEW_URL=https://download.mediathekview.de/stabil/MediathekView-$MEDIATHEK_VERSION-linux.tar.gz
+ARG MEDIATHEKVIEW_SHA512=76beda227d8c0c81e0a446d3b1efb949a43df4daf5c19ae8c0e383e4e34d4fc00f3e1a55fa22fce5b733c94b3659af77f3b86fac2c4c1b64785b0eee6f9de920
 
 # Download MediathekView.
-RUN mkdir -p /opt/MediathekView
 RUN wget -q "${MEDIATHEKVIEW_URL}" -O /tmp/MediathekView.tar.gz && \
+    printf '%s  %s\n' "${MEDIATHEKVIEW_SHA512}" /tmp/MediathekView.tar.gz | sha512sum --check --status && \
     tar xf /tmp/MediathekView.tar.gz -C /opt && \
     rm -f /tmp/MediathekView.tar.gz
 

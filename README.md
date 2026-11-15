@@ -6,7 +6,11 @@ Fork von [conrad784/docker-mediathekview-webinterface](https://github.com/conrad
 
 Das Image installiert MediathekView **15.0.0** aus dem offiziellen Linux-Archiv. Das Archiv enthält die benötigte JetBrains Runtime; sie muss nicht separat installiert werden.
 
+Das veröffentlichte Image unterstützt derzeit `linux/amd64`. Beim Versionswechsel müssen `MEDIATHEK_VERSION` und die offizielle SHA-512-Prüfsumme im Dockerfile gemeinsam aktualisiert werden.
+
 **Wichtig:** MediathekView 15.0.0 ist laut [Changelog](https://github.com/mediathekview/MediathekView/blob/master/CHANGELOG.md) nicht rückwärtskompatibel mit älteren MediathekView-Versionen. Sichere vor dem ersten Start mit Version 15 das persistente `/config`-Verzeichnis. Verwende danach nicht dieselbe Konfiguration mit einer älteren Version.
+
+Verwende den Update-Dialog innerhalb der Anwendung nicht für Container-Upgrades. Aktualisiere MediathekView über ein neu gebautes oder gepulltes Docker-Image; Änderungen direkt im laufenden Container gehen beim Ersetzen des Containers verloren.
 
 ## Container starten
 
@@ -21,10 +25,12 @@ Die Weboberfläche ist anschließend auf Port `5800` erreichbar. Passe die Pfade
 ## Image bauen
 
 ```sh
-docker build --pull -t mediathekview-webinterface:15.0.0 .
+docker build --pull --platform linux/amd64 -t mediathekview-webinterface:15.0.0 .
 ```
 
-Der Workflow `.github/workflows/docker-ghcr.yml` baut bei Pushes auf `master` oder `main` und veröffentlicht `latest` sowie `15.0.0` in der GitHub Container Registry. Der Workflow `publish.yml` veröffentlicht bei einem Git-Tag zusätzlich den gleichnamigen Image-Tag:
+Der Workflow `.github/workflows/docker-ghcr.yml` baut bei Pushes auf `master` oder `main` und veröffentlicht `latest` sowie die Version aus dem Dockerfile in der GitHub Container Registry. `publish.yml` prüft, dass ein Git-Tag mit der Dockerfile-Version übereinstimmt, bevor es den gleichnamigen Image-Tag veröffentlicht:
+
+Der Workflow `ci.yml` baut Änderungen auf Maintenance-Branches und Pull Requests ohne Image-Veröffentlichung.
 
 ```sh
 docker pull ghcr.io/tobasium/docker-mediathekview-webinterface:15.0.0
