@@ -30,6 +30,8 @@ docker build --pull --platform linux/amd64 -t mediathekview-webinterface:15.0.0 
 
 Der Workflow `.github/workflows/docker-ghcr.yml` baut bei Pushes auf `master` oder `main` und veröffentlicht `latest` sowie die Version aus dem Dockerfile in der GitHub Container Registry. `publish.yml` prüft, dass ein Git-Tag mit der Dockerfile-Version übereinstimmt, bevor es den gleichnamigen Image-Tag veröffentlicht:
 
+Der Workflow `ci.yml` baut Änderungen auf Maintenance-Branches und Pull Requests ohne Image-Veröffentlichung.
+
 ```sh
 docker pull ghcr.io/tobasium/docker-mediathekview-webinterface:15.0.0
 ```
