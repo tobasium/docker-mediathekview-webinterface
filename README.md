@@ -1,48 +1,33 @@
-[![Docker Image Build Status](https://img.shields.io/github/workflow/status/conrad784/docker-mediathekview-webinterface/Publish%20Docker%20image?label=docker%20build)](https://hub.docker.com/r/conrad784/mediathekview-webinterface)
-[![GitHub-Issues](https://img.shields.io/github/issues/conrad784/docker-mediathekview-webinterface)](https://github.com/conrad784/docker-mediathekview-webinterface/issues)
-[![GitHub-Releases](https://img.shields.io/github/tag/conrad784/docker-mediathekview-webinterface.svg)](https://github.com/conrad784/docker-mediathekview-webinterface/releases)
-[![Docker Pulls](https://img.shields.io/docker/pulls/conrad784/mediathekview-webinterface)](https://hub.docker.com/r/conrad784/mediathekview-webinterface)
+# docker-mediathekview-webinterface
 
-# docker-mediathekview
-X11rdp Version of Mediathekview
-## About
-Using this container allows you to run Mediathekview as a service and control it via webbrowser like Firefox or Chrome.
-The X11rdp feature is inherited from [https://github.com/jlesage/docker-baseimage-gui](https://github.com/jlesage/docker-baseimage-gui).
+Fork von [conrad784/docker-mediathekview-webinterface](https://github.com/conrad784/docker-mediathekview-webinterface). Der Container stellt die Desktop-Anwendung MediathekView über die Browseroberfläche von [jlesage/baseimage-gui](https://github.com/jlesage/docker-baseimage-gui) bereit.
 
-## Installation
-### Manual
+## Version
 
-1. Download Dockerfile or clone the repository.
-2. Run `docker build .` to create the docker image.
-3. Wait until build process is finished.
+Das Image installiert MediathekView **15.0.0** aus dem offiziellen Linux-Archiv. Das Archiv enthält die benötigte JetBrains Runtime; sie muss nicht separat installiert werden.
 
-### Pre-build
-The Github repository is automatically build by Github Actions.
-You can pull it from Docker Hub:
-```
-docker pull conrad784/mediathekview-webinterface:latest
-```
-Some older versions can also be acquired by using e.g.
-```
-docker pull conrad784/mediathekview-webinterface:13.3.0-3
+**Wichtig:** MediathekView 15.0.0 ist laut [Changelog](https://github.com/mediathekview/MediathekView/blob/master/CHANGELOG.md) nicht rückwärtskompatibel mit älteren MediathekView-Versionen. Sichere vor dem ersten Start mit Version 15 das persistente `/config`-Verzeichnis. Verwende danach nicht dieselbe Konfiguration mit einer älteren Version.
+
+## Container starten
+
+Die Compose-Datei baut das Image lokal und bindet die Konfiguration sowie Downloads aus dem Benutzerverzeichnis ein:
+
+```sh
+docker compose up -d --build
 ```
 
-## Running it
-For additional configuration options, have a look at the [available environment-variables](https://github.com/jlesage/docker-baseimage-gui#environment-variables).
-For basic usage, just use
-```
-docker run -it -p 127.0.0.1:5800:5800 --rm \
-    -v $HOME/.mediathek3:/config:rw \
-    -v <path to your media files>:/output:rw \
-    conrad784/mediathekview-webinterface:latest
+Die Weboberfläche ist anschließend auf Port `5800` erreichbar. Passe die Pfade in `docker-compose.yml` an deine Umgebung an. Weitere Optionen wie Benutzer-ID und Anzeigeeinstellungen sind in der [Dokumentation von baseimage-gui](https://github.com/jlesage/docker-baseimage-gui#environment-variables) beschrieben.
+
+## Image bauen
+
+```sh
+docker build --pull -t mediathekview-webinterface:15.0.0 .
 ```
 
-## Developing
-Make your changes, then build new version:
-`docker build --rm -t mymediathek -f Dockerfile .`
+Der Workflow `.github/workflows/docker-ghcr.yml` baut bei Pushes auf `master` oder `main` und veröffentlicht `latest` sowie `15.0.0` in der GitHub Container Registry. Der Workflow `publish.yml` veröffentlicht bei einem Git-Tag zusätzlich den gleichnamigen Image-Tag:
 
-Run the container with some testing environment:
-`docker run --name mymedia -p 127.0.0.1:5800:5800 --rm -it -e USER_ID=99 -e GROUP_ID=99 -e KEEP_APP_RUNNING=1 -v /tmp/mediathek_config:/config:rw -v /tmp/mediathek_downloads:/output:rw  mymediathek:latest`
+```sh
+docker pull ghcr.io/tobasium/docker-mediathekview-webinterface:15.0.0
+```
 
-attach to running container and debug:
-`docker exec -it mymedia bash`
+Das Projekt ist ein Fork und veröffentlicht sein Image unter dem eigenen GHCR-Namespace. Die Docker-Hub-Images und Badges des Upstream-Projekts gehören nicht zu diesem Fork.

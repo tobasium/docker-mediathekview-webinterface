@@ -2,30 +2,30 @@
 FROM jlesage/baseimage-gui:debian-12-v4
 
 ENV USER_ID=0 GROUP_ID=0 TERM=xterm
+ENV MEDIATHEK_VERSION=15.0.0
 
-ENV MEDIATHEK_VERSION=14.5.0
-
-# Refresh apt cache
-RUN apt-get update \
-    && apt-get upgrade -y
-
-# Locale needed for storing files with umlaut
-RUN apt-get install -y apt-utils locales \
-    && echo en_US.UTF-8 UTF-8 > /etc/locale.gen \
-    && locale-gen
+# Locale needed for storing files with umlaut.
+RUN \
+    add-pkg apt-utils locales && \
+    sed-patch 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen && \
+    locale-gen
 
 ENV LC_ALL en_US.UTF-8
 ENV LANGUAGE en_US.UTF-8
 ENV LANG en_US.UTF-8
 
-# Runtime deps
-RUN apt-get install -y \
+# Runtime dependencies.
+RUN \
+    add-pkg \
         wget \
-	procps \
+        ca-certificates \
+        procps \
         vlc \
-        flvstreamer \
         ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
+        libxtst6 \
+        libxrender1 \
+        libxi6 \
+        libxext6
 
 # Maximize only the main/initial window.
 COPY src/main-window-selection.xml /etc/openbox/main-window-selection.xml
@@ -43,15 +43,16 @@ LABEL \
       org.label-schema.name="mediathekview" \
       org.label-schema.description="Docker container for Mediathekview" \
       org.label-schema.version=$MEDIATHEK_VERSION \
-      org.label-schema.vcs-url="https://github.com/conrad784/docker-mediathekview-webinterface" \
+      org.label-schema.vcs-url="https://github.com/tobasium/docker-mediathekview-webinterface" \
       org.label-schema.schema-version="1.0"
 
 # Define software download URLs.
 ARG MEDIATHEKVIEW_URL=https://download.mediathekview.de/stabil/MediathekView-$MEDIATHEK_VERSION-linux.tar.gz
 
-# download Mediathekview
+# Download MediathekView.
 RUN mkdir -p /opt/MediathekView
-RUN wget -q ${MEDIATHEKVIEW_URL} -O MediathekView.tar.gz
-RUN tar xf MediathekView.tar.gz -C /opt
+RUN wget -q "${MEDIATHEKVIEW_URL}" -O /tmp/MediathekView.tar.gz && \
+    tar xf /tmp/MediathekView.tar.gz -C /opt && \
+    rm -f /tmp/MediathekView.tar.gz
 
 COPY src/startapp.sh /startapp.sh
